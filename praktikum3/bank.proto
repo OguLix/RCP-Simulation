@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package bank;
+
+service LayananBank {
+  // Unary RPC: transfer saldo antar akun dengan deduplikasi request_id.
+  rpc Transfer(TransferRequest) returns (TransferResponse);
+
+  // Unary RPC: mengambil saldo akun.
+  rpc GetSaldo(SaldoRequest) returns (SaldoResponse);
+}
+
+message TransferRequest {
+  string request_id = 1;
+  string pengirim = 2;
+  string penerima = 3;
+  double jumlah = 4;
+}
+
+message TransferResponse {
+  bool sukses = 1;
+  string pesan = 2;
+  string request_id = 3;
+  double saldo_pengirim = 4;
+  double saldo_penerima = 5;
+}
+
+message SaldoRequest {
+  string nama = 1;
+}
+
+message SaldoResponse {
+  string nama = 1;
+  double saldo = 2;
+}

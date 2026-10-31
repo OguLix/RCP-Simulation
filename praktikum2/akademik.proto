@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package akademik;
+
+service LayananNilai {
+  // Unary RPC: mengambil identitas dan IPK mahasiswa.
+  rpc GetMahasiswa(MahasiswaRequest) returns (Mahasiswa);
+
+  // Unary RPC: menyimpan atau memperbarui nilai satu mata kuliah.
+  rpc TambahNilai(NilaiRequest) returns (StatusResponse);
+
+  // Server streaming RPC: mengirim nilai satu per satu.
+  rpc StreamNilai(MahasiswaRequest) returns (stream Nilai);
+
+  // Client streaming RPC (L2.1): menerima banyak nilai dalam satu pemanggilan.
+  rpc KirimBanyakNilai(stream NilaiRequest) returns (StatusResponse);
+
+  // Bidirectional streaming RPC (L2.2): diskusi antara client dan server.
+  rpc Diskusi(stream Pesan) returns (stream Pesan);
+}
+
+message MahasiswaRequest {
+  string nim = 1;
+}
+
+message Mahasiswa {
+  string nim = 1;
+  string nama = 2;
+  double ipk = 3;
+  string prodi = 4;  // L2.3: field baru untuk pengujian backward compatibility.
+}
+
+message NilaiRequest {
+  string nim = 1;
+  string matkul = 2;
+  double nilai = 3;
+}
+
+message Nilai {
+  string matkul = 1;
+  double nilai = 2;
+}
+
+message StatusResponse {
+  bool sukses = 1;
+  string pesan = 2;
+  int32 jumlah_disimpan = 3;
+}
+
+// L2.2: pesan untuk bidirectional streaming Diskusi.
+message Pesan {
+  string pengirim = 1;
+  string isi = 2;
+}

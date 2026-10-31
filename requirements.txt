@@ -1,0 +1,4 @@
+# Praktikum 1 memakai Python standard library saja (xmlrpc.server/xmlrpc.client).
+grpcio>=1.76,<2
+grpcio-tools>=1.76,<2
+matplotlib>=3.9
