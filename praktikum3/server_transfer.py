@@ -7,6 +7,7 @@ import random
 import threading
 import time
 from concurrent import futures
+from contextlib import nullcontext
 
 import grpc
 
@@ -25,6 +26,7 @@ class LayananBank(pb_grpc.LayananBankServicer):
         use_lock: bool = True,
         simulated_delay: float = 0.0,
         timeout_sim_prob: float = 0.0,
+        race_barrier: threading.Barrier | None = None,
     ) -> None:
         self._balances: dict[str, float] = dict(balances or DEFAULT_BALANCES)
         self._dedup_cache: dict[str, pb.TransferResponse] = {}
@@ -32,6 +34,9 @@ class LayananBank(pb_grpc.LayananBankServicer):
         self._lock = threading.Lock()
         self._simulated_delay = simulated_delay
         self._timeout_sim_prob = timeout_sim_prob
+        # Hook pengujian: barrier memaksa beberapa thread membaca saldo yang sama
+        # sebelum salah satunya menulis, sehingga lost update dapat direproduksi.
+        self._race_barrier = race_barrier
 
     @property
     def balances(self) -> dict[str, float]:
@@ -43,23 +48,33 @@ class LayananBank(pb_grpc.LayananBankServicer):
         return len(self._dedup_cache)
 
     def Transfer(self, request: pb.TransferRequest, context: grpc.ServicerContext) -> pb.TransferResponse:
-        # Simulasi delay pemrosesan (untuk pengujian timeout).
+        # Simulasi delay pemrosesan sebelum masuk critical section.
         if self._simulated_delay > 0:
             delay = random.uniform(0, self._simulated_delay)
             time.sleep(delay)
 
-        if self._use_lock:
-            self._lock.acquire()
-        try:
-            return self._do_transfer(request, context)
-        finally:
-            if self._use_lock:
-                self._lock.release()
+        lock_context = self._lock if self._use_lock else nullcontext()
+        with lock_context:
+            response, executed = self._do_transfer(request, context)
 
-    def _do_transfer(self, request: pb.TransferRequest, context: grpc.ServicerContext) -> pb.TransferResponse:
+        # Tunda respons di luar lock dan hanya untuk transaksi baru. Retry dengan
+        # request_id yang sama akan mendapat cache hit tanpa ikut tertunda.
+        if executed and self._timeout_sim_prob > 0 and random.random() < self._timeout_sim_prob:
+            time.sleep(3.0)
+
+        return response
+
+    def _do_transfer(
+        self,
+        request: pb.TransferRequest,
+        context: grpc.ServicerContext,
+    ) -> tuple[pb.TransferResponse, bool]:
+        if not request.request_id.strip():
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "request_id wajib diisi.")
+
         # Cek cache deduplikasi: request_id yang sama menghasilkan respons identik.
         if request.request_id in self._dedup_cache:
-            return self._dedup_cache[request.request_id]
+            return self._dedup_cache[request.request_id], False
 
         # Validasi akun dan jumlah.
         if request.pengirim not in self._balances:
@@ -80,7 +95,16 @@ class LayananBank(pb_grpc.LayananBankServicer):
         if not self._use_lock:
             saldo_kirim = self._balances[request.pengirim]
             saldo_terima = self._balances[request.penerima]
-            time.sleep(0.001)  # Perbesar jendela race condition.
+            if self._race_barrier is not None:
+                try:
+                    self._race_barrier.wait(timeout=5.0)
+                except threading.BrokenBarrierError:
+                    context.abort(
+                        grpc.StatusCode.ABORTED,
+                        "Barrier pengujian race condition gagal disinkronkan.",
+                    )
+            else:
+                time.sleep(0.001)  # Perbesar jendela race condition.
             self._balances[request.pengirim] = saldo_kirim - request.jumlah
             self._balances[request.penerima] = saldo_terima + request.jumlah
         else:
@@ -96,12 +120,7 @@ class LayananBank(pb_grpc.LayananBankServicer):
         )
 
         self._dedup_cache[request.request_id] = response
-
-        # Tunda pengiriman respons setelah transfer tersimpan untuk memicu timeout client.
-        if self._timeout_sim_prob > 0 and random.random() < self._timeout_sim_prob:
-            time.sleep(3.0)
-
-        return response
+        return response, True
 
     def GetSaldo(self, request: pb.SaldoRequest, context: grpc.ServicerContext) -> pb.SaldoResponse:
         if self._use_lock:
@@ -123,6 +142,7 @@ def build_server(
     simulated_delay: float = 0.0,
     timeout_sim_prob: float = 0.0,
     balances: dict[str, float] | None = None,
+    race_barrier: threading.Barrier | None = None,
 ) -> tuple[grpc.Server, LayananBank]:
     """Membuat server gRPC dan mengembalikan instance server serta servicer."""
     servicer = LayananBank(
@@ -130,6 +150,7 @@ def build_server(
         use_lock=use_lock,
         simulated_delay=simulated_delay,
         timeout_sim_prob=timeout_sim_prob,
+        race_barrier=race_barrier,
     )
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=max_workers))
     pb_grpc.add_LayananBankServicer_to_server(servicer, server)
@@ -148,7 +169,7 @@ def parse_args() -> argparse.Namespace:
         "--simulate-timeout-prob",
         default=0.0,
         type=float,
-        help="Probabilitas simulasi timeout (sleep 3 detik setelah transfer).",
+        help="Probabilitas respons ditunda 3 detik setelah transaksi tersimpan (di luar lock).",
     )
     return parser.parse_args()
 

@@ -6,7 +6,7 @@ Repositori pengerjaan praktikum individu mata kuliah Komputasi Paralel dan Terdi
 
 | Praktikum | Topik | Butir | Status |
 | --- | --- | --- | --- |
-| 1 | XML-RPC | L1.1 - L1.5 | Selesai dan tervalidasi |
+| 1 | XML-RPC | L1.1 - L1.5 | Selesai; L1.4 tervalidasi lokal, uji lintas komputer belum |
 | 2 | gRPC dan Protocol Buffers | L2.1 - L2.5 | Selesai dan tervalidasi |
 | 3 | Concurrency, timeout, failover | L3.1 - L3.5 | Selesai dan tervalidasi |
 
@@ -106,16 +106,16 @@ Kode praktikum tidak diletakkan di root. Semua panduan eksekusi dipusatkan di RE
 | L1.1 | `pangkat(a, b)` dan `akar(x)` | `praktikum1/calculator_service.py` |
 | L1.2 | `statistik(daftar)` -> min, max, rata2 | `praktikum1/calculator_service.py` |
 | L1.3 | `datetime` dan integer di atas 2^31 | `praktikum1/client_calculator.py --probe-l1-3` |
-| L1.4 | 100 panggilan RPC vs lokal | `praktikum1/benchmark_latency.py` |
+| L1.4 | 100 panggilan RPC vs lokal (localhost; lintas komputer belum) | `praktikum1/benchmark_latency.py` |
 | L1.5 | Perilaku saat server berhenti | `praktikum1/client_calculator.py --expect-offline` |
 | L2.1 | Client streaming `KirimBanyakNilai` | `praktikum2/server_grpc.py`, `client_grpc.py` |
 | L2.2 | Bidirectional streaming `Diskusi` | `praktikum2/server_grpc.py`, `client_grpc.py` |
 | L2.3 | Field `prodi = 4` dan kompatibilitas stub lama | `praktikum2/test_backward_compat.py`, `old_stubs/` |
 | L2.4 | Ukuran Protobuf vs XML-RPC | `praktikum2/compare_message_size.py` |
 | L2.5 | 10 unary call asinkron | `praktikum2/client_async.py` |
-| L3.1 | 20 transfer A ke B, total tetap 1500 | `praktikum3/verify_transfer.py` |
-| L3.2 | ID tetap vs ID baru saat retry | `praktikum3/simulate_double_transfer.py` |
-| L3.3 | 50 transfer dari 10 client, lock vs no-lock | `praktikum3/simulate_race_condition.py` |
+| L3.1 | 20 transfer A ke B, total tetap 1500, validasi `request_id` | `praktikum3/verify_transfer.py` |
+| L3.2 | ID tetap vs ID baru saat retry, termasuk skenario timeout | `praktikum3/simulate_double_transfer.py` |
+| L3.3 | 50 transfer dari 10 client, lock vs no-lock dengan barrier terkontrol | `praktikum3/simulate_race_condition.py` |
 | L3.4 | 200 `GetMahasiswa` dari 20 client, worker 1/4/10 | `praktikum3/benchmark_workers.py` |
 | L3.5 | Failover dua server dan dampak restart | `praktikum3/client_failover.py` |
 
@@ -193,17 +193,17 @@ Perilaku yang teramati:
 Dengan server aktif:
 
 ```powershell
-python praktikum1\benchmark_latency.py --samples 100
+python praktikum1\benchmark_latency.py --samples 100 --warmup 10
 ```
 
-Hasil validasi pada satu mesin:
+Benchmark melakukan pemanasan, lalu mengukur setiap panggilan dengan `time.perf_counter()` dan melaporkan total, rata-rata, median, stdev, minimum, dan maksimum. Hasil validasi terakhir pada satu mesin (Windows 11, Python 3.14.7, `127.0.0.1:8000`, 100 sampel, 10 pemanasan, resolusi timer 100 ns):
 
-| Metode | Total 100 panggilan | Rata-rata | Minimum | Maksimum |
-| --- | ---: | ---: | ---: | ---: |
-| `tambah(5, 3)` lokal | 0.018 ms | 0.000 ms | 0.000 ms | 0.001 ms |
-| XML-RPC `tambah(5, 3)` | 102.609 ms | 1.026 ms | 0.833 ms | 7.597 ms |
+| Metode | Total 100 panggilan | Rata-rata | Median | Stdev | Minimum | Maksimum |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `tambah(5, 3)` lokal | 0.0311 ms | 0.0003 ms | 0.0003 ms | 0.0001 ms | 0.0002 ms | 0.0010 ms |
+| XML-RPC `tambah(5, 3)` | 170.9735 ms | 1.7097 ms | 1.6215 ms | 0.3110 ms | 1.3078 ms | 2.7506 ms |
 
-Durasi lokal berada di batas resolusi timer, sehingga rasio ratusan/ribuan kali hanya berlaku sebagai bukti benchmark bekerja. Untuk klaim lintas mesin, jalankan server dan client pada dua komputer lalu catat IP dan jenis jaringan.
+Selisih rata-rata 1.709 ms per panggilan, dengan rasio sekitar 5497x. Angka ini **bukan klaim biaya jaringan**: panggilan lokal berada dekat resolusi timer dan pengukuran hanya dilakukan di localhost. Uji lintas komputer **belum dilakukan**; untuk melakukannya jalankan server dengan `--host 0.0.0.0`, arahkan client ke IP server, lalu catat IP, jenis jaringan, dan hasil aktualnya.
 
 ## L1.5 - Server berhenti
 
@@ -250,6 +250,7 @@ Lima test mencakup operasi dasar, pembagian nol, L1.1, L1.2, dan serialisasi `da
 | `--host` | `127.0.0.1` | Host server. |
 | `--port` | `8000` | Port server. |
 | `--samples` | `100` | Jumlah panggilan tiap metode. |
+| `--warmup` | `10` | Jumlah panggilan pemanasan sebelum pengukuran. |
 
 ## Ukuran pesan `tambah(5, 3)`
 
@@ -368,7 +369,9 @@ python praktikum2\compare_message_size.py
 | Respons GetMahasiswa (Andi, IPK 3.26, Informatika) | 37 byte | 432 byte | 11.7x |
 | Request TambahNilai (Komputasi Paralel, 88) | 37 byte | 396 byte | 10.7x |
 | Request `tambah(5, 3)` | 4 byte | 190 byte | 47.5x |
-| 4 nilai mata kuliah | 93 byte | 911 byte | 9.8x |
+| 4 pesan `Nilai` vs 4 respons XML-RPC terpisah | 93 byte | 1145 byte | 12.3x |
+
+Metode: yang dibandingkan adalah **payload serialisasi aplikasi**, bukan paket jaringan. Header HTTP/1.1 dan framing HTTP/2 + prefix 5 byte per pesan gRPC tidak dihitung untuk kedua sisi. XML-RPC menyertakan envelope `methodCall`/`methodResponse`, sedangkan Protobuf hanya message biner. Data keempat membandingkan 4 pesan Protobuf dengan 4 respons XML-RPC terpisah agar setara; bukan 4 pesan melawan satu array. Untuk `tambah(5, 3)` tidak ada RPC di `akademik.proto`, sehingga sisi Protobuf memakai ilustrasi manual dua varint (4 byte) dan diberi catatan eksplisit. Karena framing tidak dihitung, hasil ini tidak boleh dipakai sebagai klaim ukuran paket di jaringan.
 
 ## L2.5 - Client asinkron dengan future
 
@@ -378,7 +381,24 @@ Dengan server aktif:
 python praktikum2\client_async.py --port 50051
 ```
 
-10 request `GetMahasiswa` dikirim memakai `stub.GetMahasiswa.future()` tanpa menunggu satu per satu. Hasil validasi: 9 sukses, 1 gagal `NOT_FOUND` (NIM `9999999`), total waktu 28.9 ms untuk 10 request. Karena non-blocking, waktu total mendekati satu request, bukan 10x lipat.
+10 request `GetMahasiswa` dikirim memakai `stub.GetMahasiswa.future()` tanpa menunggu satu per satu. Waktu selesai dicatat lewat callback pada setiap future, sehingga latency individual terpisah dari total wall-clock.
+
+Hasil validasi terakhir (server `127.0.0.1:50051`, 10 request, 1 request sengaja `NOT_FOUND`):
+
+| Metrik | Nilai |
+| --- | ---: |
+| Total request | 10 |
+| Sukses / gagal | 9 / 1 |
+| Wall-clock total | 14.6 ms |
+| Fase submit | 5.8 ms |
+| Latency individual: min / mean / median / p95 / max | 4.3 / 8.4 / 9.1 / 12.1 / 12.1 ms |
+| Throughput | 683.9 request/detik |
+| Concurrency factor | 5.71x |
+
+- **Latency individual** = waktu dari submit sampai future selesai, bukan `wall-clock / jumlah request`.
+- **Throughput** = jumlah request / wall-clock total.
+- **Concurrency factor** = jumlah latency individual / wall-clock total. Nilai 1.0 berarti tidak ada overlap (serial); nilai mendekati 10 berarti pekerjaan saling tumpang tindih. Angka ini adalah indikator overlap, **bukan jumlah thread yang aktif pada satu waktu**.
+- Latency request gagal tetap dihitung karena future tetap selesai.
 
 ## Opsi CLI
 
@@ -436,7 +456,7 @@ File `bank_pb2.py` dan `bank_pb2_grpc.py` adalah hasil generate dan tidak diedit
 ## Model data dan alur
 
 - Saldo awal default: `A = 1000`, `B = 500` (total 1500).
-- Setiap transfer menyertakan `request_id`. ID yang sudah pernah diproses dikembalikan dari `_dedup_cache` dengan respons identik, sehingga retry tidak menggandakan transfer.
+- Setiap transfer menyertakan `request_id`. ID yang sudah pernah diproses server yang sama dikembalikan dari `_dedup_cache` dengan respons identik, sehingga retry tidak menggandakan transfer pada server tersebut. Cache tidak dibagi antar-server dan hilang saat restart.
 - `threading.Lock` melindungi saldo dan cache. Mode `--no-lock` disediakan untuk mendemonstrasikan race condition.
 - Client mengulang hanya pada `UNAVAILABLE` atau `DEADLINE_EXCEEDED`, memakai `request_id` yang sama, dengan backoff `0.5s, 1s, 2s`.
 - `FailoverBankClient` berpindah endpoint saat server aktif tidak tersedia. Error bisnis (`FAILED_PRECONDITION`, `INVALID_ARGUMENT`, `NOT_FOUND`) tidak memicu failover.
@@ -475,7 +495,7 @@ python praktikum3\client_transfer.py --action transfer --failover-endpoints "127
 python praktikum3\verify_transfer.py
 ```
 
-20 transfer @ 10 dari A ke B. Hasil yang diharapkan: A = 800, B = 700, total = 1500, dedup cache 20 entri.
+20 transfer @ 10 dari A ke B dengan `request_id` unik. Hasil validasi: A = 800, B = 700, total = 1500, dedup cache 20 entri. Skrip juga mengirim `request_id` kosong dan berisi spasi; keduanya ditolak dengan `INVALID_ARGUMENT` tanpa mengubah saldo.
 
 ## L3.2 - ID tetap vs ID baru
 
@@ -483,8 +503,9 @@ python praktikum3\verify_transfer.py
 python praktikum3\simulate_double_transfer.py
 ```
 
-- Retry dengan ID sama: saldo A hanya berkurang sekali (1000 -> 900).
+- Retry dengan ID sama: respons identik dan saldo A hanya berkurang sekali (1000 -> 900).
 - Retry dengan ID baru: server menganggap transaksi baru, saldo A berkurang dua kali (900 -> 700).
+- Skenario timeout: server menyimpan transaksi lalu menunda respons 3 detik **di luar lock**. Retry dengan ID sama mendapat cache hit tanpa eksekusi kedua; hasil validasi A = 900, B = 600, cache 1 entri, total waktu 0.71 s termasuk retry.
 
 ## L3.3 - Concurrency 50 transfer
 
@@ -492,14 +513,14 @@ python praktikum3\simulate_double_transfer.py
 python praktikum3\simulate_race_condition.py
 ```
 
-10 client x 5 transfer @ 10 secara bersamaan.
+10 client x 5 transfer @ 10 secara bersamaan. Mode tanpa lock memakai `threading.Barrier` sebagai hook pengujian: sekelompok thread dipaksa membaca saldo yang sama sebelum ada yang menulis, sehingga lost update dapat direproduksi secara terkontrol. Barrier tidak dipakai pada mode produksi.
 
 | Mode | Saldo A | Saldo B | Total | Hasil |
 | --- | ---: | ---: | ---: | --- |
-| Dengan lock | 500 | 1000 | 1500 | Konsisten |
-| Tanpa lock | 780 (contoh) | 720 (contoh) | 1500 | Lost update (nilai berbeda tiap run) |
+| Dengan lock (3 ronde) | 500 | 1000 | 1500 | Konsisten di setiap ronde |
+| Tanpa lock + barrier (3 ronde) | 950 | 550 | 1500 | Lost update, hasil sama di setiap ronde |
 
-Tanpa lock, operasi baca-ubah-tulis saldo disela thread lain sehingga pembaruan tertimpa. Total bisa tetap 1500 meski distribusi saldo tidak konsisten.
+Tanpa lock, operasi baca-ubah-tulis saldo disela thread lain sehingga pembaruan tertimpa. Pada konfigurasi barrier ini, hanya satu dari sepuluh pembaruan per batch yang tercatat, sehingga A = 950 dan B = 550. Total kebetulan tetap 1500, tetapi distribusi saldo tidak sesuai dengan 50 transfer yang seharusnya. Tanpa barrier, besar penyimpangan dapat berbeda karena bergantung pada penjadwalan thread.
 
 ## L3.4 - Benchmark worker
 
@@ -507,17 +528,17 @@ Tanpa lock, operasi baca-ubah-tulis saldo disela thread lain sehingga pembaruan 
 python praktikum3\benchmark_workers.py
 ```
 
-200 request `GetMahasiswa` dari 20 client (10 request/client), server diberi `time.sleep(0.1)` per request, diuji pada `max_workers` 1, 4, dan 10. Skrip memakai layanan dari `../praktikum2`.
+200 request `GetMahasiswa` dari 20 client (10 request/client), server diberi `time.sleep(0.1)` per request, diuji pada `max_workers` 1, 4, dan 10. Skrip memakai layanan dari `../praktikum2`. Persentil memakai metode **nearest-rank**: data diurutkan lalu diambil indeks `ceil(p * n) - 1`; metode yang sama dipakai untuk P50, P95, dan P99.
 
-Hasil validasi:
+Hasil validasi terakhir:
 
-| max_workers | Waktu total (s) | Throughput (req/s) | Latensi rata-rata (ms) | P95 (ms) |
-| :---: | :---: | :---: | :---: | :---: |
-| 1 | 20.32 | 9.8 | 1932.6 | 2038.3 |
-| 4 | 5.07 | 39.5 | 485.7 | 510.4 |
-| 10 | 2.05 | 97.5 | 198.9 | 208.3 |
+| max_workers | Waktu total (s) | Throughput (req/s) | Mean (ms) | P95 (ms) | P99 (ms) |
+| :---: | :---: | :---: | :---: | :---: | :---: |
+| 1 | 20.45 | 9.8 | 1944.2 | 2053.6 | 2058.0 |
+| 4 | 5.13 | 39.0 | 491.0 | 540.3 | 545.4 |
+| 10 | 2.12 | 94.5 | 203.4 | 221.1 | 225.1 |
 
-Grafik disimpan ke `praktikum3/l3_4_throughput_latency.png` dan `docs/reports/l3_4_throughput_latency.png`.
+Grafik disimpan ke `praktikum3/l3_4_throughput_latency.png` dan `docs/reports/l3_4_throughput_latency.png`. Speedup throughput relatif terhadap 1 worker: 4.0x pada 4 worker dan 9.6x pada 10 worker. Angka ini berlaku untuk beban I/O-bound dengan delay buatan 100 ms pada mesin uji, bukan batas universal.
 
 ## L3.5 - Failover dan restart
 
@@ -527,11 +548,14 @@ python praktikum3\client_failover.py
 
 Skenario:
 
-1. Primary (`50081`) dan backup (`50082`) aktif, transfer pertama dilayani primary.
-2. Primary dimatikan; transfer berikutnya otomatis dilayani backup tanpa client crash.
-3. Backup direstart; cache dedup kosong dan retry dengan `request_id` lama dieksekusi lagi (saldo A menjadi 800).
+1. Primary (`50081`) dan backup (`50082`) aktif dengan saldo awal sama, tetapi state tidak direplikasi.
+2. Transfer `tx-shared-001` (50) dieksekusi primary: primary A=950/B=550, backup tetap A=1000/B=500.
+3. Primary dimatikan. Client failover ke backup dan mengirim **ID yang sama**; backup mengeksekusi lagi: A=950/B=550. Angka ini kebetulan sama dengan primary karena backup mulai dari A=1000 lalu menjalankan satu transfer 50, bukan karena state direplikasi. Ini membuktikan double execution lintas server.
+4. Pengulangan ID yang sama di backup menghasilkan respons cache identik dan saldo tidak berubah (dedup per-server).
+5. Backup direstart dengan saldo dipulihkan manual A=950/B=550, tetapi cache kosong. Retry dengan ID yang sama mengeksekusi transfer lagi: A=900/B=600.
+6. `request_id` kosong/spasi ditolak dengan `INVALID_ARGUMENT` tanpa mengubah saldo.
 
-Kesimpulan: deduplikasi in-memory hilang saat restart. Solusi yang disarankan adalah penyimpanan persisten (PostgreSQL/SQLite dengan unique constraint pada `request_id`, Redis AOF, atau outbox/event log).
+Kesimpulan: failover hanya memindahkan request, tidak mereplikasi saldo/cache. Deduplikasi in-memory hanya memberi at-most-once selama proses server yang sama hidup; **tidak ada jaminan exactly-once lintas server atau lintas restart**. Solusi yang disarankan adalah penyimpanan transaksi persisten dengan unique constraint pada `request_id` (PostgreSQL/SQLite), WAL, cache terdistribusi dengan persistence (Redis AOF), atau outbox/event log, disertai replikasi state jika konsistensi lintas server diperlukan.
 
 ## Opsi CLI
 
@@ -565,6 +589,7 @@ Kesimpulan: deduplikasi in-memory hilang saat restart. Solusi yang disarankan ad
 | Server manual | 50051 |
 | L3.1 `verify_transfer.py` | 50071 |
 | L3.2 `simulate_double_transfer.py` | 50072 |
+| L3.2 skenario timeout | 50078 |
 | L3.3 dengan lock / tanpa lock | 50073 / 50074 |
 | L3.4 worker 1 / 4 / 10 | 50075 / 50076 / 50077 |
 | L3.5 primary / backup | 50081 / 50082 |
@@ -572,8 +597,8 @@ Kesimpulan: deduplikasi in-memory hilang saat restart. Solusi yang disarankan ad
 ## Catatan dan batasan Praktikum 3
 
 - Dedup cache hanya di memori; restart menghapus riwayat `request_id`.
-- Opsi `--simulate-timeout-prob` menunda respons di dalam critical section, sehingga selama delay berlangsung RPC lain ikut menunggu. Opsi ini tidak dipakai pada skrip validasi L3.1-L3.5.
-- Hasil L3.3 tanpa lock dapat berbeda tiap eksekusi karena bergantung pada interleaving thread.
+- `--simulate-timeout-prob` menunda respons 3 detik **di luar critical section** dan hanya untuk transaksi baru. Retry dengan ID yang sama mendapat cache hit tanpa ikut tertunda. Fitur ini dipakai pada skenario timeout L3.2.
+- Hasil L3.3 tanpa lock pada skrip validasi memakai barrier terkontrol sehingga dapat diulang; tanpa barrier, besar penyimpangan bergantung pada interleaving thread.
 - Bukti lengkap ada di [laporan validasi Praktikum 3](docs/reports/praktikum3-validation.md).
 
 ---
@@ -587,6 +612,7 @@ Kesimpulan: deduplikasi in-memory hilang saat restart. Solusi yang disarankan ad
 | Praktikum 3 server manual | 50051 |
 | L3.1 | 50071 |
 | L3.2 | 50072 |
+| L3.2 timeout | 50078 |
 | L3.3 dengan/tanpa lock | 50073 / 50074 |
 | L3.4 worker 1/4/10 | 50075 / 50076 / 50077 |
 | L3.5 primary/backup | 50081 / 50082 |
