@@ -1,5 +1,25 @@
+# Virtual environment
 .venv/
+venv/
+
+# Python cache
 __pycache__/
 *.py[cod]
+*.pyo
 .pytest_cache/
-docs/reports/generated/
+.mypy_cache/
+.ruff_cache/
+
+# Build dan distribusi
+build/
+dist/
+*.egg-info/
+
+# Editor dan OS
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+
+# Log dan output sementara
+*.log

@@ -1,4 +1,4 @@
-"""Client demonstrasi dan penanganan error untuk server XML-RPC Praktikum 1."""
+"""Client demonstrasi dan penanganan error server XML-RPC kalkulator."""
 
 from __future__ import annotations
 
@@ -63,11 +63,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--host", default="127.0.0.1", help="Host server (default: 127.0.0.1).")
     parser.add_argument("--port", default=8000, type=int, help="Port server (default: 8000).")
     parser.add_argument("--verbose", action="store_true", help="Tampilkan XML HTTP request/response.")
-    parser.add_argument("--probe-l1-3", action="store_true", help="Jalankan pengujian datetime dan integer besar L1.3.")
+    parser.add_argument("--probe-l1-3", action="store_true", help="Jalankan pengujian datetime dan integer besar.")
     parser.add_argument(
         "--expect-offline",
         action="store_true",
-        help="L1.5: sukses hanya bila koneksi ke server gagal dan error tertangani.",
+        help="Sukses hanya bila koneksi ke server gagal dan error tertangani.",
     )
     return parser.parse_args()
 
@@ -78,7 +78,7 @@ def main() -> int:
     try:
         if args.expect_offline:
             proxy.system.listMethods()
-            print("Server masih aktif; matikan server terlebih dahulu untuk pengujian L1.5.")
+            print("Server masih aktif; matikan server terlebih dahulu untuk pengujian server offline.")
             return 1
         if args.probe_l1_3:
             run_l1_3_probe(proxy)

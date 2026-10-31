@@ -1,4 +1,4 @@
-"""Client gRPC bank dengan retry dan exponential backoff untuk Praktikum 3."""
+"""Client gRPC bank dengan retry exponential backoff dan failover."""
 
 from __future__ import annotations
 

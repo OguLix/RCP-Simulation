@@ -1,10 +1,10 @@
 """Benchmark throughput dan latensi: 200 GetMahasiswa dari 20 client (L3.4).
 
-Konfigurasi sesuai modul praktikum resmi dosen (halaman 11):
+Konfigurasi pengukuran:
 - Total pemanggilan: 200 requests.
 - Beban konkuren: 20 client threads (masing-masing 10 request).
 - Delay server: time.sleep(0.1) ditambahkan di server (simulasi I/O / DB 100 ms).
-- Evaluasi max_workers: 1, 4, dan 10 workers.
+- Variasi max_workers: 1, 4, dan 10 workers.
 
 Menghasilkan:
 1. Tabel perbandingan throughput (req/s) dan statistik latensi (min, mean, p50, p95, max).
@@ -38,11 +38,11 @@ TOTAL_REQUESTS = 200
 NUM_CLIENTS = 20
 REQUESTS_PER_CLIENT = TOTAL_REQUESTS // NUM_CLIENTS  # 10
 WORKER_CONFIGS = [1, 4, 10]
-SIMULATED_DELAY = 0.1  
+SIMULATED_DELAY = 0.1
 
 
 class BenchmarkLayananNilai(LayananNilai):
-    """LayananNilai dengan delay time.sleep(0.1) sesuai modul L3.4."""
+    """LayananNilai dengan delay time.sleep(0.1) per request (L3.4)."""
 
     def __init__(self, delay_sec: float = SIMULATED_DELAY) -> None:
         super().__init__()
@@ -172,7 +172,7 @@ def main() -> None:
 
     # Tampilkan tabel hasil
     print("\n" + "=" * 80)
-    print("TABEL HASIL PENGUKURAN L3.4 (sesuai format modul dosen)")
+    print("TABEL HASIL PENGUKURAN L3.4")
     print("=" * 80)
     print(f"{'max_workers':<12} | {'Waktu total (s)':<16} | {'Throughput (req/s)':<20} | {'Latensi rata-rata (ms)':<22}")
     print("-" * 80)

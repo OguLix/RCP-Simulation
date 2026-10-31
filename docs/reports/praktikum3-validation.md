@@ -19,7 +19,7 @@
 | L3.1 | [verify_transfer.py](file:///c:/Kuliah/Semester%205/KPT/RPC/Individu/praktikum3/verify_transfer.py) | **LULUS** | 20 Transfer berulang: saldo total tetap 1500, A berkurang tepat 200 (A=800, B=700). |
 | L3.2 | [simulate_double_transfer.py](file:///c:/Kuliah/Semester%205/KPT/RPC/Individu/praktikum3/simulate_double_transfer.py) | **LULUS** | ID baru menyebabkan *double transfer* (A=700 alih-alih 800), ID tetap menjaga idempotensi. |
 | L3.3 | [simulate_race_condition.py](file:///c:/Kuliah/Semester%205/KPT/RPC/Individu/praktikum3/simulate_race_condition.py) | **LULUS** | Dengan lock konsisten (A=500, B=1000). Tanpa lock terjadi *lost update* (A=880, B=620). |
-| L3.4 | [benchmark_workers.py](file:///c:/Kuliah/Semester%205/KPT/RPC/Individu/praktikum3/benchmark_workers.py) | **LULUS** | Sesuai modul (`sleep(0.1)`): Throughput 9.8 req/s (1 worker), 39.5 req/s (4 worker), 97.5 req/s (10 worker). |
+| L3.4 | [benchmark_workers.py](file:///c:/Kuliah/Semester%205/KPT/RPC/Individu/praktikum3/benchmark_workers.py) | **LULUS** | `sleep(0.1)` per request: Throughput 9.8 req/s (1 worker), 39.5 req/s (4 worker), 97.5 req/s (10 worker). |
 | L3.5 | [client_failover.py](file:///c:/Kuliah/Semester%205/KPT/RPC/Individu/praktikum3/client_failover.py) | **LULUS** | Failover otomatis ke port cadangan saat primary mati. Dampak hilangnya cache saat restart dibuktikan. |
 
 ---
@@ -76,7 +76,7 @@
 ### 4. L3.4 - Benchmark Concurrency Server (`GetMahasiswa`)
 
 - **Skrip:** `praktikum3/benchmark_workers.py`
-- **Metodologi (Sesuai Modul Dosen Hal. 11):** 200 total request dikirim secara konkuren oleh 20 client thread (10 request/thread) terhadap server `GetMahasiswa` dengan `time.sleep(0.1)` ditambahkan di server untuk `max_workers` = 1, 4, dan 10.
+- **Metodologi:** 200 total request dikirim secara konkuren oleh 20 client thread (10 request/thread) terhadap server `GetMahasiswa` dengan `time.sleep(0.1)` ditambahkan di server untuk `max_workers` = 1, 4, dan 10.
 - **Tabel Hasil Pengukuran:**
 
 | max_workers | Waktu total (s) | Throughput (req/s) | Latensi rata-rata (ms) | P95 (ms) |

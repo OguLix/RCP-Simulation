@@ -10,7 +10,7 @@ import sys
 import os
 import xmlrpc.client
 
-# Pastikan import dari direktori praktikum2.
+# Pastikan modul lokal pada direktori ini dapat diimpor.
 sys.path.insert(0, os.path.dirname(__file__))
 import akademik_pb2 as pb
 
@@ -53,8 +53,8 @@ def main() -> None:
     print(f"  Rasio    : XML-RPC {xml_size_2 / proto_size_2:.1f}x lebih besar dari Protobuf")
     print()
 
-    # --- Data 3: tambah(5, 3) untuk perbandingan langsung dengan Praktikum 1 ---
-    print("--- Data 3: Panggilan tambah(5, 3) - Perbandingan dengan Praktikum 1 ---")
+    # --- Data 3: tambah(5, 3) untuk perbandingan langsung dengan XML-RPC ---
+    print("--- Data 3: Panggilan tambah(5, 3) - Perbandingan dengan XML-RPC ---")
 
     # Protobuf: tidak ada definisi 'tambah' di proto, jadi kita simulasikan
     # dengan dua int32 dalam sebuah message sederhana. Ukuran minimum protobuf

@@ -1,4 +1,4 @@
-"""Server gRPC dasar untuk Praktikum 2."""
+"""Server gRPC akademik: unary, server streaming, client streaming, dan bidirectional."""
 
 from __future__ import annotations
 

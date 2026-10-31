@@ -28,8 +28,6 @@ Generator menghasilkan `akademik_pb2.py` dan `akademik_pb2_grpc.py` pada `prakti
 | `GetMahasiswa(9999999)` | `NOT_FOUND` dengan pesan NIM tidak ditemukan. |
 | `TambahNilai(..., nilai=101)` | `INVALID_ARGUMENT` dengan pesan nilai harus 0-100. |
 
-## Status
-
 ## L2.1 - client streaming `KirimBanyakNilai`
 
 Kontrak menambahkan `rpc KirimBanyakNilai(stream NilaiRequest) returns (StatusResponse)`. Field `jumlah_disimpan = 3` juga ditambahkan pada `StatusResponse`, sehingga server dapat mengembalikan jumlah pesan yang berhasil disimpan tanpa mengubah field lama.
@@ -46,6 +44,6 @@ Hasil server: `3 nilai tersimpan.` dengan `jumlah_disimpan=3`. Pemanggilan `Stre
 
 Server menampung stream terlebih dahulu, memvalidasi seluruh pesan, lalu menyimpannya dalam satu critical section. Dengan demikian stream kosong atau pesan invalid ditolak tanpa menyisakan penyimpanan parsial.
 
-## Status
+## Status akhir
 
-Kontrak dasar, generated stub, server, client, unary RPC, server streaming, dua status error, dan L2.1 client streaming sudah tervalidasi. Tahap berikutnya adalah L2.2: bidirectional streaming `Diskusi`.
+Kontrak dasar, generated stub, server, client, unary RPC, server streaming, dua status error, dan L2.1 client streaming sudah tervalidasi. Butir L2.2-L2.5 kemudian divalidasi pada [praktikum2-validation.md](praktikum2-validation.md).

@@ -35,7 +35,7 @@ def run_demo(host: str, port: int) -> None:
     with grpc.insecure_channel(f"{host}:{port}") as channel:
         stub = pb_grpc.LayananNilaiStub(channel)
 
-        # --- Unary: GetMahasiswa (sekarang dengan prodi L2.3) ---
+        # --- Unary: GetMahasiswa (termasuk field prodi) ---
         mahasiswa = stub.GetMahasiswa(pb.MahasiswaRequest(nim="2023001"), timeout=3)
         print(f"{mahasiswa.nama} ({mahasiswa.nim}) - IPK {mahasiswa.ipk:.2f} - Prodi: {mahasiswa.prodi}")
 

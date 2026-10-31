@@ -1,4 +1,4 @@
-"""Server gRPC bank untuk Praktikum 3: transfer, deduplikasi, dan concurrency."""
+"""Server gRPC bank: transfer, deduplikasi request_id, dan concurrency."""
 
 from __future__ import annotations
 
@@ -97,7 +97,7 @@ class LayananBank(pb_grpc.LayananBankServicer):
 
         self._dedup_cache[request.request_id] = response
 
-        # Simulasi balasan terlambat sesuai modul praktikum (transfer SUDAH dieksekusi)
+        # Tunda pengiriman respons setelah transfer tersimpan untuk memicu timeout client.
         if self._timeout_sim_prob > 0 and random.random() < self._timeout_sim_prob:
             time.sleep(3.0)
 
@@ -138,11 +138,11 @@ def build_server(
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Server gRPC bank untuk Praktikum 3.")
+    parser = argparse.ArgumentParser(description="Server gRPC bank.")
     parser.add_argument("--host", default="127.0.0.1", help="Host bind (default: 127.0.0.1).")
     parser.add_argument("--port", default=50051, type=int, help="Port gRPC (default: 50051).")
     parser.add_argument("--max-workers", default=10, type=int, help="Jumlah worker (default: 10).")
-    parser.add_argument("--no-lock", action="store_true", help="Nonaktifkan locking (L3.3 demo race condition).")
+    parser.add_argument("--no-lock", action="store_true", help="Nonaktifkan locking untuk demonstrasi race condition.")
     parser.add_argument("--delay", default=0.0, type=float, help="Simulasi delay maks dalam detik (default: 0).")
     parser.add_argument(
         "--simulate-timeout-prob",

@@ -1,4 +1,4 @@
-"""Server XML-RPC kalkulator untuk Praktikum 1."""
+"""Server XML-RPC kalkulator: aritmetika, pangkat/akar, dan statistik."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 
 
 def build_server(host: str, port: int) -> SimpleXMLRPCServer:
-    """Membuat server dan mendaftarkan seluruh RPC yang dibutuhkan L1.1-L1.2."""
+    """Membuat server dan mendaftarkan seluruh fungsi kalkulator."""
     server = SimpleXMLRPCServer(
         (host, port),
         requestHandler=RequestHandler,
