@@ -6,7 +6,7 @@
 - Interpreter: Python 3.14.7 64-bit dalam `.venv/`.
 - Dependensi: `grpcio 1.85.1`, `grpcio-tools 1.85.1`, dan `protobuf 7.36.2`.
 - Host: `127.0.0.1`.
-- Port pengujian: `50063`.
+- Port pengujian: `50051`.
 
 ## Fondasi (tervalidasi sebelumnya)
 
@@ -51,7 +51,7 @@ Stub lama memiliki field 'prodi': False
 Respons GetMahasiswa dengan stub LAMA:
   nim  : 2023001
   nama : Andi
-  ipk  : 3.35
+  ipk  : 3.26
   prodi: (field tidak ada pada stub lama - ini yang diharapkan)
 
 [BUKTI] Client dengan stub lama berhasil memanggil server baru.
@@ -64,25 +64,43 @@ Field 'prodi' yang dikirim server diabaikan secara aman oleh client lama.
 
 | Data | Protobuf | XML-RPC | Rasio |
 | --- | ---: | ---: | ---: |
-| GetMahasiswa response (Andi, IPK 3.26, Informatika) | 37 bytes | 432 bytes | 11.7x |
-| TambahNilai request (Komputasi Paralel, 88) | 37 bytes | 396 bytes | 10.7x |
-| tambah(5, 3) request | 4 bytes | 190 bytes | 47.5x |
-| 4 nilai mata kuliah | 93 bytes | 911 bytes | 9.8x |
+| GetMahasiswa response (Andi, IPK 3.26, Informatika) | 37 byte | 432 byte | 11.7x |
+| TambahNilai request (Komputasi Paralel, 88) | 37 byte | 396 byte | 10.7x |
+| tambah(5, 3) request | 4 byte | 190 byte | 47.5x |
+| 4 pesan `Nilai` vs 4 respons XML-RPC terpisah | 93 byte | 1145 byte | 12.3x |
 
-Protobuf menggunakan encoding biner (varint, length-delimited) sehingga ukurannya jauh lebih kecil. Overhead XML mencakup tag pembuka/penutup, deklarasi tipe, dan whitespace. Pada volume data besar atau frekuensi tinggi, perbedaan ini sangat berpengaruh terhadap bandwidth.
+Metode pengukuran:
+
+- Yang dibandingkan adalah payload serialisasi aplikasi, bukan paket jaringan.
+- Header HTTP/1.1 dan framing HTTP/2 + prefix 5 byte per pesan gRPC tidak dihitung untuk kedua sisi.
+- XML-RPC menyertakan envelope `methodCall`/`methodResponse`; Protobuf hanya message biner.
+- Data keempat membandingkan 4 pesan Protobuf dengan 4 respons XML-RPC terpisah, bukan 4 pesan melawan satu array XML-RPC.
+- Untuk `tambah(5, 3)` tidak ada RPC di `akademik.proto`; sisi Protobuf memakai ilustrasi manual dua varint dan diberi catatan eksplisit.
+
+Protobuf menggunakan encoding biner (varint, length-delimited) sehingga payload yang diuji lebih kecil. Overhead XML mencakup tag, deklarasi tipe, dan envelope. Karena framing tidak dihitung, hasil ini tidak boleh dipakai sebagai klaim ukuran paket di jaringan.
 
 ## L2.5 - Client asinkron dengan future
 
-10 request `GetMahasiswa` dikirim secara asinkron menggunakan `stub.GetMahasiswa.future()`:
+10 request `GetMahasiswa` dikirim secara asinkron menggunakan `stub.GetMahasiswa.future()`. Waktu selesai setiap request dicatat melalui callback, sehingga latency individual tidak dicampur dengan wall-clock total.
+
+Hasil aktual (server `127.0.0.1:50051`, 10 request, 1 request sengaja `NOT_FOUND`):
 
 ```
-Semua 10 request dikirim dalam 15.2 ms.
-Sukses: 9, Gagal: 1 (NIM 9999999: NOT_FOUND)
-Waktu total: 28.9 ms
-Rata-rata: 2.9 ms/request
+Total request      : 10
+Sukses / gagal     : 9 / 1
+Wall clock total   : 14.6 ms
+Fase submit        : 5.8 ms
+Latency individual : min 4.3 ms | mean 8.4 ms | median 9.1 ms | p95 12.1 ms | max 12.1 ms
+Throughput         : 683.9 request/detik
+Concurrency factor : 5.71x
+Jika serial        : sekitar 83.5 ms (jumlah latency individual)
 ```
 
-Karena request non-blocking, seluruh request dikirim hampir bersamaan. Waktu total mendekati waktu satu request, bukan 10x lipat seperti panggilan sinkron berurutan.
+- **Latency individual** = submit sampai future selesai; bukan `wall-clock / jumlah request`.
+- **Throughput** = jumlah request / wall-clock total.
+- **Concurrency factor** = jumlah latency individual / wall-clock total. Nilai 1.0 berarti serial, nilai mendekati 10 berarti pekerjaan saling tumpang tindih. Angka ini adalah indikator overlap, bukan jumlah thread aktif.
+- Latency request gagal tetap dihitung karena future tetap selesai.
+- Persentil memakai nearest-rank, konsisten dengan benchmark L3.4.
 
 ## File yang ditambahkan/diubah
 
