@@ -5,7 +5,7 @@
 - Tanggal: 31 Oktober 2026 (Asia/Jakarta).
 - Interpreter: Python 3.14 64-bit.
 - Host: satu komputer lokal (`127.0.0.1`).
-- Server uji: port `8010` (dipilih agar tidak mengganggu port default `8000`).
+- Server uji: port `8000` (default).
 - Jumlah sampel benchmark: 100 panggilan untuk tiap metode.
 
 ## Unit test
@@ -45,14 +45,18 @@ Seluruh RPC yang tersedia: `tambah`, `kali`, `bagi`, `pangkat`, `akar`, `statist
 - `datetime(2026, 10, 31, 10, 30, 0)` berhasil dikirim dan diterima kembali sebagai `datetime` saat `use_builtin_types=True` digunakan.
 - Integer `2147483648` (`2^31`) memunculkan `OverflowError: int exceeds XML-RPC limits` pada client sebelum request dikirim. Ini konsisten dengan batas integer signed 32-bit pada XML-RPC standard library.
 
-## L1.4 - benchmark lokal awal
+## L1.4 - benchmark lokal
 
-| Metode | Total 100 panggilan | Rata-rata | Minimum | Maksimum |
-| --- | ---: | ---: | ---: | ---: |
-| `tambah(5, 3)` lokal | 0.018 ms | 0.000 ms | 0.000 ms | 0.001 ms |
-| XML-RPC `tambah(5, 3)` | 102.609 ms | 1.026 ms | 0.833 ms | 7.597 ms |
+Perintah: `python praktikum1\benchmark_latency.py --samples 100 --warmup 10`.
 
-Perbandingan rata-rata yang tercetak adalah sekitar 5669.0x. Angka ini tidak boleh dipakai sebagai klaim lintas komputer karena durasi panggilan lokal berada dekat resolusi timer. Hasil ini hanya membuktikan benchmark bekerja. Untuk memenuhi tugas, ulangi dengan server dan client pada dua komputer berbeda, lalu catat IP, jaringan, dan hasil aktualnya.
+Lingkungan: Windows 11, Python 3.14.7 64-bit, `127.0.0.1:8000`, resolusi `time.perf_counter()` 100 ns, 100 sampel, 10 panggilan pemanasan.
+
+| Metode | Total 100 panggilan | Rata-rata | Median | Stdev | Minimum | Maksimum |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `tambah(5, 3)` lokal | 0.0311 ms | 0.0003 ms | 0.0003 ms | 0.0001 ms | 0.0002 ms | 0.0010 ms |
+| XML-RPC `tambah(5, 3)` | 170.9735 ms | 1.7097 ms | 1.6215 ms | 0.3110 ms | 1.3078 ms | 2.7506 ms |
+
+Selisih rata-rata 1.709 ms per panggilan, rasio sekitar 5497x. Angka ini tidak boleh dipakai sebagai klaim lintas komputer karena durasi lokal berada dekat resolusi timer dan pengukuran hanya dilakukan di localhost. Hasil ini membuktikan benchmark bekerja, bukan biaya jaringan. **Uji dua komputer fisik belum dilakukan**; langkahnya: jalankan server dengan `--host 0.0.0.0`, arahkan client ke IP server, lalu catat IP, jenis jaringan, dan hasil aktualnya.
 
 ## L1.5 - server mati
 
@@ -99,7 +103,7 @@ Setelah server pengujian dihentikan, client dengan `--expect-offline` menampilka
 - **Ukuran Response XML:** **121 bytes**.
   - **Overhead XML Response:** `(121 - 1) / 121 * 100% = 99.17%` overhead tag XML.
 - **Komparasi Protobuf:**
-  Sebagai perbandingan, pada Praktikum 2, request gRPC setara hanya membutuhkan **4 bytes** (Protobuf binary varint), menghemat bandwidth hingga **47.5x lebih ringkas** dibanding XML-RPC.
+  Sebagai perbandingan, ilustrasi encoding dua varint untuk request setara hanya membutuhkan **4 bytes**. Angka ini bukan pesan dari `akademik.proto` (tidak ada RPC `tambah` di sana), sehingga hanya menggambarkan overhead format, bukan hasil pengukuran RPC Protobuf yang sebenarnya.
 
 ## Catatan Pengujian Lanjutan
 
