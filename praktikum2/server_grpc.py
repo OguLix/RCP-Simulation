@@ -1,4 +1,9 @@
-"""Server gRPC akademik: unary, server streaming, client streaming, dan bidirectional."""
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Server gRPC akademik: unary, server streaming, client streaming, dan bidirectional."""
 
 from __future__ import annotations
 
@@ -135,8 +140,20 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     args = parse_args()
+    tampilkan_header("PRAKTIKUM 2 - SERVER gRPC AKADEMIK (L2.1-L2.5)", "Server")
     server = build_server(args.host, args.port, args.max_workers)
     server.start()
     print(f"Server gRPC berjalan di {args.host}:{args.port} (max_workers={args.max_workers}).")

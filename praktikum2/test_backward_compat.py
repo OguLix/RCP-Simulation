@@ -1,4 +1,9 @@
-"""L2.3: Membuktikan backward compatibility Protobuf.
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+L2.3: Membuktikan backward compatibility Protobuf.
 
 Skrip ini menggunakan stub LAMA (tanpa field prodi) untuk berkomunikasi
 dengan server BARU (yang sudah mengirim field prodi). Jika berhasil,
@@ -24,12 +29,24 @@ sys.path.pop(0)
 import grpc
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="L2.3: uji backward compatibility dengan stub lama.")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=50051, type=int)
     args = parser.parse_args()
 
+    tampilkan_header("PRAKTIKUM 2.3 - PENGUJIAN BACKWARD COMPATIBILITY PROTOCOL BUFFERS", "Test")
     print("=== L2.3: Backward Compatibility Test ===")
     print(f"Menggunakan stub LAMA dari: {OLD_STUBS_DIR}")
     print(f"Koneksi ke server BARU di {args.host}:{args.port}")

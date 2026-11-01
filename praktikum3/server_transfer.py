@@ -1,4 +1,9 @@
-"""Server gRPC bank: transfer, deduplikasi request_id, dan concurrency."""
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Server gRPC bank: transfer, deduplikasi request_id, dan concurrency."""
 
 from __future__ import annotations
 
@@ -174,8 +179,20 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     args = parse_args()
+    tampilkan_header("PRAKTIKUM 3 - SERVER BANK gRPC (L3.1-L3.5)", "Server")
     server, servicer = build_server(
         host=args.host,
         port=args.port,

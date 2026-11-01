@@ -1,4 +1,9 @@
-"""L2.4: membandingkan ukuran payload Protobuf vs XML-RPC untuk data setara.
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+L2.4: membandingkan ukuran payload Protobuf vs XML-RPC untuk data setara.
 
 Metode pengukuran:
 - Yang dibandingkan adalah payload serialisasi aplikasi, bukan paket jaringan.
@@ -31,7 +36,19 @@ def report_case(label: str, proto_size: int, xml_size: int, catatan: str = "") -
     print()
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
+    tampilkan_header("PRAKTIKUM 2.4 - PERBANDINGAN UKURAN PESAN XML-RPC DAN PROTOBUF", "Test")
     print("=== L2.4: Perbandingan Ukuran Payload Protobuf vs XML-RPC ===\n")
     print("Metode: ukuran payload serialisasi aplikasi; header HTTP dan framing gRPC")
     print("tidak dihitung untuk kedua sisi. XML-RPC menyertakan envelope methodCall/")

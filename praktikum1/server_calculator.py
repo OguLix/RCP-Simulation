@@ -1,4 +1,9 @@
-"""Server XML-RPC kalkulator: aritmetika, pangkat/akar, dan statistik."""
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Server XML-RPC kalkulator: aritmetika, pangkat/akar, dan statistik."""
 
 from __future__ import annotations
 
@@ -35,8 +40,20 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     args = parse_args()
+    tampilkan_header("PRAKTIKUM 1 - SERVER XML-RPC KALKULATOR", "Server")
     server = build_server(args.host, args.port)
     print(f"Server XML-RPC berjalan di http://{args.host}:{args.port}/RPC2")
     try:

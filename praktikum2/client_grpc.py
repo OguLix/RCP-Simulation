@@ -1,4 +1,9 @@
-"""Client demonstrasi unary, streaming, bidirectional, dan gRPC status codes."""
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Client demonstrasi unary, streaming, bidirectional, dan gRPC status codes."""
 
 from __future__ import annotations
 
@@ -29,6 +34,17 @@ def diskusi_messages():
     ]
     for pengirim, isi in pesan_list:
         yield pb.Pesan(pengirim=pengirim, isi=isi)
+
+
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
 
 
 def run_demo(host: str, port: int) -> None:
@@ -88,6 +104,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    tampilkan_header("PRAKTIKUM 2 - CLIENT gRPC AKADEMIK (L2.1-L2.5)", "Client")
     try:
         run_demo(args.host, args.port)
     except grpc.RpcError as error:

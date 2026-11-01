@@ -1,4 +1,9 @@
-"""Dukungan ``<i8>`` untuk pengujian integer besar pada L1.3.
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Dukungan ``<i8>`` untuk pengujian integer besar pada L1.3.
 
 XML-RPC standar mendefinisikan ``<int>`` sebagai signed 32-bit. Marshaller
 bawaan Python menolak nilai di luar rentang itu sebelum request dikirim,

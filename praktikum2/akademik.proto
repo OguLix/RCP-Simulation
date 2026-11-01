@@ -1,3 +1,7 @@
+// Praktikum RPC - Komputasi Paralel dan Terdistribusi
+// Nama : Muhammad Fadhlan Aminullah
+// NPM  : 247006111151
+//
 syntax = "proto3";
 
 package akademik;

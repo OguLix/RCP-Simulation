@@ -1,4 +1,9 @@
-"""Benchmark throughput dan latensi: 200 GetMahasiswa dari 20 client (L3.4).
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Benchmark throughput dan latensi: 200 GetMahasiswa dari 20 client (L3.4).
 
 Konfigurasi pengukuran:
 - Total pemanggilan: 200 requests.
@@ -168,10 +173,22 @@ def generate_plot(results: list[dict[str, float]], save_paths: list[str]) -> Non
     plt.close()
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
+    tampilkan_header("PRAKTIKUM 3.4 - PENGUKURAN THROUGHPUT BERDASARKAN JUMLAH WORKER", "Benchmark")
     print("=== L3.4: Benchmark Concurrency GetMahasiswa (benchmark_workers) ===\n")
     print(f"Total Requests  : {TOTAL_REQUESTS}")
     print(f"Client Threads  : {NUM_CLIENTS}")

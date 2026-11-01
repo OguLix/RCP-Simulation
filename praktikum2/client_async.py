@@ -1,4 +1,9 @@
-"""L2.5: client asinkron menggunakan gRPC future untuk 10 panggilan konkuren.
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+L2.5: client asinkron menggunakan gRPC future untuk 10 panggilan konkuren.
 
 Skrip ini mengirim 10 GetMahasiswa request secara asinkron menggunakan
 stub.GetMahasiswa.future(), lalu mengumpulkan seluruh hasilnya. Untuk setiap
@@ -40,12 +45,24 @@ def percentile_nearest_rank(values: list[float], p: float) -> float:
     return ordered[min(max(rank - 1, 0), len(ordered) - 1)]
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="L2.5: client asinkron dengan future.")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", default=50051, type=int)
     args = parser.parse_args()
 
+    tampilkan_header("PRAKTIKUM 2.5 - IMPLEMENTASI ASYNCHRONOUS RPC", "Client")
     print("=== L2.5: Client Asinkron dengan gRPC Future ===")
     print(f"Mengirim {len(NIMS_TO_QUERY)} GetMahasiswa request secara asinkron.\n")
 

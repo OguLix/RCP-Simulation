@@ -1,4 +1,9 @@
-"""Client gRPC bank dengan retry exponential backoff dan failover."""
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Client gRPC bank dengan retry exponential backoff dan failover."""
 
 from __future__ import annotations
 
@@ -202,8 +207,20 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     args = parse_args()
+    tampilkan_header("PRAKTIKUM 3 - CLIENT BANK gRPC (L3.1-L3.5)", "Client")
 
     # Mode Failover Multi-Endpoint
     if args.failover_endpoints:

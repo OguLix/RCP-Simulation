@@ -1,4 +1,9 @@
-"""Simulasi race condition pada transfer konkuren: dengan lock vs tanpa lock (L3.3).
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Simulasi race condition pada transfer konkuren: dengan lock vs tanpa lock (L3.3).
 
 Mode tanpa lock memakai threading.Barrier sebagai hook pengujian. Barrier membuat
 sekelompok thread membaca saldo yang sama sebelum ada yang menulis, sehingga
@@ -90,10 +95,22 @@ def run_concurrent_transfers(
         server.stop(grace=0)
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
+    tampilkan_header("PRAKTIKUM 3.3 - PENGUJIAN RACE CONDITION DAN CONCURRENCY", "Test")
     print("=== L3.3: Concurrency Test (simulate_race_condition) ===\n")
     print(f"Konfigurasi: {NUM_CLIENTS} threads x {TRANSFERS_PER_CLIENT} transfer = {TOTAL_TRANSFERS} transfer.")
     print(f"Saldo awal: A={INITIAL_A:.0f}, B={INITIAL_B:.0f} (total {INITIAL_A + INITIAL_B:.0f}).")

@@ -1,4 +1,9 @@
-"""Logika kalkulator yang dipakai server XML-RPC dan benchmark lokal."""
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Logika kalkulator yang dipakai server XML-RPC dan benchmark lokal."""
 
 from __future__ import annotations
 

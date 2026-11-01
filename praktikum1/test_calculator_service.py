@@ -1,4 +1,9 @@
-"""Unit test lokal yang tidak memerlukan server aktif."""
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Unit test lokal yang tidak memerlukan server aktif."""
 
 import unittest
 import xmlrpc.client
@@ -6,6 +11,17 @@ from datetime import datetime
 
 from calculator_service import akar, bagi, kali, pangkat, pantulkan, statistik, tambah
 from xmlrpc_i8 import dumps_i8
+
+
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
 
 
 class CalculatorServiceTests(unittest.TestCase):
@@ -65,6 +81,8 @@ class CalculatorServiceTests(unittest.TestCase):
         self.assertEqual(context.exception.faultCode, 1)
         self.assertEqual(context.exception.faultString, "uji fault")
 
+
+tampilkan_header("PRAKTIKUM 1.1 - IMPLEMENTASI OPERASI MATEMATIKA XML-RPC", "Test")
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -1,4 +1,9 @@
-"""Client demonstrasi dan penanganan error server XML-RPC kalkulator."""
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Client demonstrasi dan penanganan error server XML-RPC kalkulator."""
 
 from __future__ import annotations
 
@@ -17,6 +22,17 @@ def create_proxy(host: str, port: int, verbose: bool = False) -> I8ServerProxy:
         verbose=verbose,
         use_builtin_types=True,
     )
+
+
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
 
 
 def run_demo(proxy: xmlrpc.client.ServerProxy) -> None:
@@ -91,6 +107,13 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
     proxy = create_proxy(args.host, args.port, args.verbose)
+    if args.expect_offline:
+        judul = "PRAKTIKUM 1.5 - PENGUJIAN KONEKSI SERVER OFFLINE"
+    elif args.probe_l1_3:
+        judul = "PRAKTIKUM 1.3 - PENGUJIAN PERTUKARAN TIPE DATA XML-RPC"
+    else:
+        judul = "PRAKTIKUM 1.1 - IMPLEMENTASI OPERASI MATEMATIKA XML-RPC"
+    tampilkan_header(judul, "Client")
     try:
         if args.expect_offline:
             proxy.system.listMethods()

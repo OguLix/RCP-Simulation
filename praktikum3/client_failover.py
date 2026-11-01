@@ -1,4 +1,9 @@
-"""Demonstrasi failover dua server dan batas deduplikasi in-memory (L3.5).
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Demonstrasi failover dua server dan batas deduplikasi in-memory (L3.5).
 
 Membuktikan:
 1. Dua server berjalan: primary di 50081 dan backup di 50082.
@@ -57,10 +62,22 @@ def assert_empty_request_id_rejected(stub: pb_grpc.LayananBankStub) -> None:
             raise AssertionError(f"request_id {bad_id!r} diterima, seharusnya ditolak.")
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
+    tampilkan_header("PRAKTIKUM 3.5 - PENGUJIAN FAILOVER ANTARSERVER (PENGAYAAN)", "Test")
     print("=== L3.5: Failover Dua Server & Batas Deduplikasi (client_failover) ===\n")
 
     server_primary, servicer_primary = build_server(

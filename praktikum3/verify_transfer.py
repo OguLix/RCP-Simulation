@@ -1,4 +1,9 @@
-"""Verifikasi 20 transfer berulang A ke B dengan deduplikasi (L3.1).
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Verifikasi 20 transfer berulang A ke B dengan deduplikasi (L3.1).
 
 Setiap transfer mengirim 10 dari A ke B. Setelah 20 transfer:
 - A = 1000 - 200 = 800
@@ -55,9 +60,21 @@ def assert_empty_request_id_rejected(stub: pb_grpc.LayananBankStub) -> None:
             )
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
+    tampilkan_header("PRAKTIKUM 3.1 - PENGUJIAN RETRY DENGAN REQUEST ID DAN AT-MOST-ONCE", "Test")
     print("=== L3.1: 20 Transfer A->B dengan Deduplikasi (verify_transfer) ===\n")
 
     # Start server secara programatik.

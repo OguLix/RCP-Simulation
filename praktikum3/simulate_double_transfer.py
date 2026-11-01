@@ -1,4 +1,9 @@
-"""Simulasi double transfer: efek request_id baru di setiap retry vs request_id tetap (L3.2).
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+Simulasi double transfer: efek request_id baru di setiap retry vs request_id tetap (L3.2).
 
 Membuktikan:
 1. Skenario benar (at-most-once): retry dengan request_id SAMA tidak menyebabkan
@@ -81,10 +86,22 @@ def run_timeout_retry_scenario() -> None:
         server.stop(grace=0)
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
 
+    tampilkan_header("PRAKTIKUM 3.2 - PENGUJIAN RETRY DENGAN REQUEST ID BARU", "Test")
     print("=== L3.2: Efek Request ID pada Retry dan Transfer Ganda (simulate_double_transfer) ===\n")
 
     server, servicer = build_server(port=PORT, balances={"A": 1000.0, "B": 500.0})

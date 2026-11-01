@@ -1,4 +1,9 @@
-"""L1.4: membandingkan latensi panggilan lokal dan XML-RPC pada satu mesin."""
+"""Praktikum RPC - Komputasi Paralel dan Terdistribusi
+
+Nama : Muhammad Fadhlan Aminullah
+NPM  : 247006111151
+
+L1.4: membandingkan latensi panggilan lokal dan XML-RPC pada satu mesin."""
 
 from __future__ import annotations
 
@@ -45,8 +50,20 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def tampilkan_header(judul: str, peran: str | None = None) -> None:
+    print("=" * 60)
+    print(judul)
+    print("Mata Kuliah : Komputasi Paralel dan Terdistribusi")
+    print("Nama        : Muhammad Fadhlan Aminullah")
+    print("NPM         : 247006111151")
+    if peran:
+        print(f"Peran       : {peran}")
+    print("=" * 60)
+
+
 def main() -> None:
     args = parse_args()
+    tampilkan_header("PRAKTIKUM 1.4 - PENGUKURAN PERFORMA RPC", "Benchmark")
     if args.samples < 1:
         raise SystemExit("--samples harus minimal 1.")
     if args.warmup < 0:
