@@ -105,7 +105,7 @@ Kode praktikum tidak diletakkan di root. Semua panduan eksekusi dipusatkan di RE
 | --- | --- | --- |
 | L1.1 | `pangkat(a, b)` dan `akar(x)` | `praktikum1/calculator_service.py` |
 | L1.2 | `statistik(daftar)` -> min, max, rata2 | `praktikum1/calculator_service.py` |
-| L1.3 | `datetime` dan integer di atas 2^31 | `praktikum1/client_calculator.py --probe-l1-3` |
+| L1.3 | `datetime` dan integer `2^31 + 1` via ekstensi `<i8>` | `praktikum1/client_calculator.py --probe-l1-3`, `praktikum1/xmlrpc_i8.py` |
 | L1.4 | 100 panggilan RPC vs lokal (localhost; lintas komputer belum) | `praktikum1/benchmark_latency.py` |
 | L1.5 | Perilaku saat server berhenti | `praktikum1/client_calculator.py --expect-offline` |
 | L2.1 | Client streaming `KirimBanyakNilai` | `praktikum2/server_grpc.py`, `client_grpc.py` |
@@ -130,6 +130,7 @@ Server dan client kalkulator berbasis XML-RPC yang memakai standard library Pyth
 | File | Fungsi |
 | --- | --- |
 | `praktikum1/calculator_service.py` | Logika kalkulator murni untuk server dan benchmark lokal. |
+| `praktikum1/xmlrpc_i8.py` | Ekstensi `<i8>` untuk pengujian integer besar L1.3. |
 | `praktikum1/server_calculator.py` | Server XML-RPC dan registrasi method. |
 | `praktikum1/client_calculator.py` | Client demo, fault handling, probe, dan uji server offline. |
 | `praktikum1/benchmark_latency.py` | Pembanding latensi lokal vs XML-RPC. |
@@ -186,7 +187,16 @@ python praktikum1\client_calculator.py --probe-l1-3 --verbose
 Perilaku yang teramati:
 
 - `datetime` dikirim sebagai `dateTime.iso8601` dan kembali sebagai `datetime.datetime` karena `use_builtin_types=True`.
-- Integer `2^31` (2147483648) melewati batas signed 32-bit XML-RPC. Client Python memunculkan `OverflowError: int exceeds XML-RPC limits` sebelum request dikirim.
+- XML-RPC standar hanya mendefinisikan `<int>` signed 32-bit (maksimum `2147483647`). Untuk menguji nilai di atas batas itu, `praktikum1/xmlrpc_i8.py` menambahkan dukungan ekstensi `<i8>` pada marshaller client dan server. Nilai `2^31 + 1` (`2147483649`) dikirim sebagai `<i8>2147483649</i8>` dan dikembalikan sebagai `int` dengan nilai yang sama.
+- Batas yang didukung ekstensi ini adalah signed 64-bit (`-2^63` sampai `2^63 - 1`).
+
+Hasil validasi:
+
+```text
+datetime dikirim/diterima: 2026-10-31T10:30:00 -> 2026-10-31T10:30:00 (datetime)
+integer besar dikirim/diterima: 2147483649 -> 2147483649 (int)
+[OK] 2147483649 > batas signed 32-bit (2147483647); nilai dan tipe int dipertahankan.
+```
 
 ## L1.4 - Latensi lokal vs XML-RPC
 
@@ -222,7 +232,7 @@ Client menangkap kegagalan koneksi (contoh: `WinError 10061`) dan menampilkan ho
 python -m unittest discover -s praktikum1 -p "test_*.py" -v
 ```
 
-Lima test mencakup operasi dasar, pembagian nol, L1.1, L1.2, dan serialisasi `datetime`.
+Enam test mencakup operasi dasar, pembagian nol, L1.1, L1.2, serialisasi `datetime`, dan round-trip `<i8>` untuk integer besar.
 
 ## Opsi CLI
 
@@ -635,7 +645,7 @@ Praktikum 2 dan server manual Praktikum 3 sama-sama memakai port `50051`, jadi j
 | --- | --- |
 | `Activate.ps1 cannot be loaded` | Jalankan `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass`, lalu aktivasi ulang. |
 | `Address already in use` / port bentrok | Cek pemakai port: `netstat -ano \| findstr :50051`, lalu hentikan proses atau ganti `--port`. Skrip L3.x memakai port tetap, jadi pastikan 50071-50082 bebas. |
-| `OverflowError: int exceeds XML-RPC limits` | Perilaku XML-RPC standar untuk integer di atas 2^31, bukan bug. |
+| `OverflowError: int exceeds XML-RPC limits` | Batas XML-RPC standar untuk `<int>` 32-bit. L1.3 memakai ekstensi `<i8>` untuk nilai sampai signed 64-bit; error ini muncul jika memakai client XML-RPC standar atau nilai di luar rentang `<i8>`. |
 | `Please upgrade your grpc module` | Versi `grpcio` dan stub tidak cocok. Jalankan `pip install -r requirements.txt` lalu regenerasi stub. |
 | Karakter Indonesia tampil rusak di console | Jalankan `$env:PYTHONUTF8=1` atau `chcp 65001`. |
 | Grafik tidak muncul | `benchmark_workers.py` memakai backend `Agg` dan menyimpan PNG, bukan menampilkan jendela. |

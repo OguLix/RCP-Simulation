@@ -13,7 +13,7 @@ Status legend: `[ ]` belum dikerjakan, `[-]` sedang dikerjakan, `[~]` selesai na
 - [x] Server dan client kalkulator dasar berjalan.
 - [x] L1.1 `pangkat` dan `akar`.
 - [x] L1.2 `statistik`.
-- [x] L1.3 `datetime` dan integer besar.
+- [x] L1.3 `datetime` dan integer besar `2^31 + 1` melalui ekstensi `<i8>`.
 - [~] L1.4 pengukuran RPC vs panggilan lokal (benchmark localhost tervalidasi; **uji dua komputer fisik belum dilakukan**).
 - [x] L1.5 error ketika server mati.
 - [x] Bukti XML request/response dan analisis ukuran pesan.

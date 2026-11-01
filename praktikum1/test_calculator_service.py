@@ -1,9 +1,11 @@
 """Unit test lokal yang tidak memerlukan server aktif."""
 
 import unittest
+import xmlrpc.client
 from datetime import datetime
 
 from calculator_service import akar, bagi, kali, pangkat, pantulkan, statistik, tambah
+from xmlrpc_i8 import dumps_i8
 
 
 class CalculatorServiceTests(unittest.TestCase):
@@ -35,6 +37,23 @@ class CalculatorServiceTests(unittest.TestCase):
     def test_l1_3_pantulkan_datetime(self) -> None:
         timestamp = datetime(2026, 10, 31, 10, 30, 0)
         self.assertEqual(pantulkan(timestamp), timestamp)
+
+    def test_l1_3_serialisasi_integer_besar(self) -> None:
+        nilai = 2**31 + 1
+        request_xml = dumps_i8((nilai,), "pantulkan", allow_none=True)
+        request_params, method = xmlrpc.client.loads(
+            request_xml, use_builtin_types=True
+        )
+        self.assertEqual(method, "pantulkan")
+        self.assertEqual(request_params, (nilai,))
+        self.assertIsInstance(request_params[0], int)
+
+        response_xml = dumps_i8((nilai,), methodresponse=True, allow_none=True)
+        response_params, _ = xmlrpc.client.loads(
+            response_xml, use_builtin_types=True
+        )
+        self.assertEqual(response_params, (nilai,))
+        self.assertIsInstance(response_params[0], int)
 
 
 if __name__ == "__main__":

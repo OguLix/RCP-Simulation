@@ -3,18 +3,19 @@
 from __future__ import annotations
 
 import argparse
-from xmlrpc.server import SimpleXMLRPCRequestHandler, SimpleXMLRPCServer
+from xmlrpc.server import SimpleXMLRPCRequestHandler
 
 from calculator_service import akar, bagi, kali, pangkat, statistik, tambah, pantulkan
+from xmlrpc_i8 import I8XMLRPCServer
 
 
 class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ("/RPC2",)
 
 
-def build_server(host: str, port: int) -> SimpleXMLRPCServer:
+def build_server(host: str, port: int) -> I8XMLRPCServer:
     """Membuat server dan mendaftarkan seluruh fungsi kalkulator."""
-    server = SimpleXMLRPCServer(
+    server = I8XMLRPCServer(
         (host, port),
         requestHandler=RequestHandler,
         allow_none=True,

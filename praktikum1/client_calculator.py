@@ -7,9 +7,11 @@ import socket
 import xmlrpc.client
 from datetime import datetime
 
+from xmlrpc_i8 import I8ServerProxy
 
-def create_proxy(host: str, port: int, verbose: bool = False) -> xmlrpc.client.ServerProxy:
-    return xmlrpc.client.ServerProxy(
+
+def create_proxy(host: str, port: int, verbose: bool = False) -> I8ServerProxy:
+    return I8ServerProxy(
         f"http://{host}:{port}/RPC2",
         allow_none=True,
         verbose=verbose,
@@ -38,7 +40,7 @@ def run_demo(proxy: xmlrpc.client.ServerProxy) -> None:
 
 
 def run_l1_3_probe(proxy: xmlrpc.client.ServerProxy) -> None:
-    """Mengamati dukungan DateTime dan batas integer XML-RPC standar."""
+    """Menguji DateTime dan integer di atas batas signed 32-bit XML-RPC."""
     timestamp = datetime(2026, 10, 31, 10, 30, 0)
     hasil_datetime = proxy.pantulkan(timestamp)
     print(
@@ -48,14 +50,28 @@ def run_l1_3_probe(proxy: xmlrpc.client.ServerProxy) -> None:
         hasil_datetime.isoformat(),
         f"({type(hasil_datetime).__name__})",
     )
+    assert isinstance(hasil_datetime, datetime), "Hasil datetime berubah tipe."
+    assert hasil_datetime == timestamp, "Nilai datetime berubah saat serialisasi."
 
-    nilai_besar = 2**31
-    try:
-        proxy.pantulkan(nilai_besar)
-    except OverflowError as error:
-        print(f"Integer {nilai_besar} ditolak sebelum dikirim: {error}")
-    else:
-        print(f"Integer {nilai_besar} berhasil dikirim; periksa implementasi XML-RPC yang digunakan.")
+    nilai_besar = 2**31 + 1
+    hasil_besar = proxy.pantulkan(nilai_besar)
+    print(
+        "integer besar dikirim/diterima:",
+        nilai_besar,
+        "->",
+        hasil_besar,
+        f"({type(hasil_besar).__name__})",
+    )
+    assert isinstance(hasil_besar, int) and not isinstance(hasil_besar, bool), (
+        "Hasil integer besar bukan int."
+    )
+    assert hasil_besar == nilai_besar, (
+        f"Nilai integer berubah: dikirim {nilai_besar}, diterima {hasil_besar}."
+    )
+    print(
+        f"[OK] {nilai_besar} > batas signed 32-bit "
+        f"({2**31 - 1}); nilai dan tipe int dipertahankan."
+    )
 
 
 def parse_args() -> argparse.Namespace:

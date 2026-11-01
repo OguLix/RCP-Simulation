@@ -2,7 +2,7 @@
 
 ## Status saat ini
 
-- Terakhir diperbarui: 31 Oktober 2026, 17:01 Asia/Jakarta.
+- Terakhir diperbarui: 1 November 2026, 21:33 Asia/Jakarta.
 - Tahap aktif: perbaikan evaluasi selesai untuk L1.4, L2.4, L2.5, L3.1, L3.2, L3.3, L3.4, dan L3.5.
 - Status keseluruhan: seluruh butir L1.1-L1.5, L2.1-L2.5, dan L3.1-L3.5 sudah diimplementasikan. Semua pengujian yang dapat dijalankan ulang pada mesin ini lulus. **L1.4 lintas komputer belum dilakukan** dan tetap ditandai belum selesai untuk bagian tersebut.
 
@@ -25,7 +25,8 @@ Lingkungan: Windows 11 64-bit, Python 3.14.7, `.venv`, `127.0.0.1`.
 ### Praktikum 1
 
 - `py_compile`: seluruh file yang diubah berhasil dikompilasi.
-- Unit test: **5 test lulus** (`python -m unittest -v test_calculator_service.py` dari `praktikum1/`).
+- Unit test: **6 test lulus** (`python -m unittest -v test_calculator_service.py` dari `praktikum1/`).
+- L1.3: `datetime` round-trip tetap berhasil; integer `2^31 + 1` (`2147483649`) dikirim dan dikembalikan sebagai `int` dengan nilai sama melalui ekstensi `<i8>`. Unit test round-trip XML request/response juga lulus.
 - L1.4, 100 sampel + 10 pemanasan, server port 8000:
   - Lokal: total 0.0311 ms, rata-rata 0.0003 ms, median 0.0003 ms, stdev 0.0001 ms.
   - XML-RPC: total 170.9735 ms, rata-rata 1.7097 ms, median 1.6215 ms, stdev 0.3110 ms.
@@ -77,7 +78,17 @@ Lingkungan: Windows 11 64-bit, Python 3.14.7, `.venv`, `127.0.0.1`.
 - L2.1 client streaming dan L2.2 bidirectional streaming: kode tidak diubah pada perbaikan ini; hasil validasi sebelumnya tetap berlaku.
 - Pengujian L1.4 pada dua komputer fisik: belum pernah dilakukan.
 
-## File yang ditambah/diubah pada perbaikan ini
+## File yang ditambah/diubah
+
+### Perbaikan L1.3 (1 November 2026)
+
+- `praktikum1/xmlrpc_i8.py` (baru) - marshaller client/server dan server dispatcher untuk ekstensi `<i8>`.
+- `praktikum1/client_calculator.py` - memakai `I8ServerProxy`; nilai uji `2^31 + 1`; assertion nilai dan tipe.
+- `praktikum1/server_calculator.py` - memakai `I8XMLRPCServer` agar respons int besar diserialisasi sebagai `<i8>`.
+- `praktikum1/test_calculator_service.py` - test round-trip XML request/response integer besar.
+- `README.md` dan `docs/reports/praktikum1-validation.md` - dokumentasi L1.3 dan hasil aktual.
+
+### Perbaikan evaluasi sebelumnya
 
 - `praktikum1/benchmark_latency.py` - pemanasan, median/stdev, presisi output, catatan localhost.
 - `praktikum2/compare_message_size.py` - payload setara, per-message comparison, penjelasan framing.
@@ -99,6 +110,7 @@ Lingkungan: Windows 11 64-bit, Python 3.14.7, `.venv`, `127.0.0.1`.
 4. **L3.4 bergantung pada mesin uji** - beban adalah I/O-bound buatan (`time.sleep(0.1)`); hasil bukan batas universal.
 5. **`benchmark_workers.py` memakai layanan dari `../praktikum2`** - disengaja agar data konsisten, tetapi Praktikum 3 tidak sepenuhnya mandiri.
 6. **Timeout simulation** - respons ditunda di luar critical section dan hanya untuk transaksi baru; retry dengan ID sama tidak ikut tertunda.
+7. **L1.3 memakai ekstensi `<i8>`** - ini bukan bagian dari XML-RPC standar 32-bit. Client/server dalam repo ini kompatibel, tetapi client XML-RPC lain yang hanya mendukung `<int>` 32-bit tidak akan memahami nilai besar tersebut.
 
 ## Langkah berikutnya
 
