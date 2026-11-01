@@ -232,7 +232,7 @@ Client menangkap kegagalan koneksi (contoh: `WinError 10061`) dan menampilkan ho
 python -m unittest discover -s praktikum1 -p "test_*.py" -v
 ```
 
-Enam test mencakup operasi dasar, pembagian nol, L1.1, L1.2, serialisasi `datetime`, dan round-trip `<i8>` untuk integer besar.
+Tujuh test mencakup operasi dasar, pembagian nol, L1.1, L1.2, serialisasi `datetime`, round-trip `<i8>` untuk integer besar, dan serialisasi Fault.
 
 ## Opsi CLI
 

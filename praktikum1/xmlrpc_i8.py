@@ -45,7 +45,17 @@ def dumps_i8(
     encoding: str = "utf-8",
     allow_none: bool = False,
 ) -> str:
-    """Membuat XML request/response dengan dukungan ``<i8>``."""
+    """Membuat XML request/response dengan dukungan ``<i8>``.
+
+    ``Fault`` selalu dibungkus dalam ``<methodResponse>`` sesuai format
+    XML-RPC standar, sama seperti perilaku ``xmlrpc.client.dumps``.
+    """
+    assert isinstance(params, (tuple, Fault)), "argument must be tuple or Fault instance"
+    if isinstance(params, Fault):
+        methodresponse = True
+    elif methodresponse and isinstance(params, tuple):
+        assert len(params) == 1, "response tuple must be a singleton"
+
     marshaller = I8Marshaller(encoding, allow_none)
     data = marshaller.dumps(params)
 
@@ -111,12 +121,14 @@ class I8XMLRPCServer(SimpleXMLRPCServer):
         except Fault as fault:
             response_xml = dumps_i8(
                 fault,
+                methodresponse=True,
                 allow_none=self.allow_none,
                 encoding=self.encoding,
             )
         except BaseException as exc:
             response_xml = dumps_i8(
                 Fault(1, f"{type(exc)}:{exc}"),
+                methodresponse=True,
                 allow_none=self.allow_none,
                 encoding=self.encoding,
             )

@@ -16,7 +16,7 @@ Perintah:
 .venv\Scripts\python.exe -m unittest discover -s praktikum1 -p 'test_*.py' -v
 ```
 
-Hasil: **6 test lulus** dalam 0.002 detik.
+Hasil: **7 test lulus** dalam 0.001 detik.
 
 - Operasi dasar (`tambah`, `kali`, `bagi`).
 - Penolakan pembagian nol.
@@ -60,7 +60,8 @@ integer besar dikirim/diterima: 2147483649 -> 2147483649 (int)
 [OK] 2147483649 > batas signed 32-bit (2147483647); nilai dan tipe int dipertahankan.
 ```
 
-- Unit test `test_l1_3_serialisasi_integer_besar` juga memverifikasi round-trip XML request dan response untuk nilai tersebut.
+- Unit test `test_l1_3_serialisasi_fault` juga memverifikasi bahwa respons Fault dibungkus dalam `<methodResponse>` dan dapat dibaca kembali sebagai `xmlrpc.client.Fault`.
+- Integrasi `bagi(10, 0)`, `akar(-1)`, dan `statistik([])` menghasilkan respons `<methodResponse><fault>...</fault></methodResponse>` standar; client menangkapnya sebagai `xmlrpc.client.Fault` tanpa error parsing.
 - Ekstensi `<i8>` mendukung rentang signed 64-bit (`-2^63` sampai `2^63 - 1`); nilai di luar rentang itu tetap ditolak dengan `OverflowError`.
 
 ## L1.4 - benchmark lokal

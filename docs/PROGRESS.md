@@ -25,7 +25,7 @@ Lingkungan: Windows 11 64-bit, Python 3.14.7, `.venv`, `127.0.0.1`.
 ### Praktikum 1
 
 - `py_compile`: seluruh file yang diubah berhasil dikompilasi.
-- Unit test: **6 test lulus** (`python -m unittest -v test_calculator_service.py` dari `praktikum1/`).
+- Unit test: **7 test lulus** (`python -m unittest -v test_calculator_service.py` dari `praktikum1/`).
 - L1.3: `datetime` round-trip tetap berhasil; integer `2^31 + 1` (`2147483649`) dikirim dan dikembalikan sebagai `int` dengan nilai sama melalui ekstensi `<i8>`. Unit test round-trip XML request/response juga lulus.
 - L1.4, 100 sampel + 10 pemanasan, server port 8000:
   - Lokal: total 0.0311 ms, rata-rata 0.0003 ms, median 0.0003 ms, stdev 0.0001 ms.

@@ -55,6 +55,16 @@ class CalculatorServiceTests(unittest.TestCase):
         self.assertEqual(response_params, (nilai,))
         self.assertIsInstance(response_params[0], int)
 
+    def test_l1_3_serialisasi_fault(self) -> None:
+        fault = xmlrpc.client.Fault(1, "uji fault")
+        response_xml = dumps_i8(fault)
+        self.assertIn("<methodResponse>", response_xml)
+        self.assertIn("<fault>", response_xml)
+        with self.assertRaises(xmlrpc.client.Fault) as context:
+            xmlrpc.client.loads(response_xml, use_builtin_types=True)
+        self.assertEqual(context.exception.faultCode, 1)
+        self.assertEqual(context.exception.faultString, "uji fault")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
