@@ -6,7 +6,7 @@ Repositori pengerjaan praktikum individu mata kuliah Komputasi Paralel dan Terdi
 
 | Praktikum | Topik | Butir | Status |
 | --- | --- | --- | --- |
-| 1 | XML-RPC | L1.1 - L1.5 | Selesai; L1.4 tervalidasi lokal, uji lintas komputer belum |
+| 1 | XML-RPC | L1.1 - L1.5 | Selesai|
 | 2 | gRPC dan Protocol Buffers | L2.1 - L2.5 | Selesai dan tervalidasi |
 | 3 | Concurrency, timeout, failover | L3.1 - L3.5 | Selesai dan tervalidasi |
 
@@ -106,7 +106,7 @@ Kode praktikum tidak diletakkan di root. Semua panduan eksekusi dipusatkan di RE
 | L1.1 | `pangkat(a, b)` dan `akar(x)` | `praktikum1/calculator_service.py` |
 | L1.2 | `statistik(daftar)` -> min, max, rata2 | `praktikum1/calculator_service.py` |
 | L1.3 | `datetime` dan integer `2^31 + 1` via ekstensi `<i8>` | `praktikum1/client_calculator.py --probe-l1-3`, `praktikum1/xmlrpc_i8.py` |
-| L1.4 | 100 panggilan RPC vs lokal (localhost; lintas komputer belum) | `praktikum1/benchmark_latency.py` |
+| L1.4 | 100 panggilan RPC vs lokal | `praktikum1/benchmark_latency.py` |
 | L1.5 | Perilaku saat server berhenti | `praktikum1/client_calculator.py --expect-offline` |
 | L2.1 | Client streaming `KirimBanyakNilai` | `praktikum2/server_grpc.py`, `client_grpc.py` |
 | L2.2 | Bidirectional streaming `Diskusi` | `praktikum2/server_grpc.py`, `client_grpc.py` |
@@ -201,9 +201,10 @@ integer besar dikirim/diterima: 2147483649 -> 2147483649 (int)
 ## L1.4 - Latensi lokal vs XML-RPC
 
 Dengan server aktif:
+python praktikum1/benchmark_latency.py --host 192.168.18.231 --port 8000 --samples 100 --warmup 10
 
 ```powershell
-python praktikum1\benchmark_latency.py --samples 100 --warmup 10
+python praktikum1/benchmark_latency.py --host 0.0.0.0 --port 8000 --samples 100 --warmup 10
 ```
 
 Benchmark melakukan pemanasan, lalu mengukur setiap panggilan dengan `time.perf_counter()` dan melaporkan total, rata-rata, median, stdev, minimum, dan maksimum. Hasil validasi terakhir pada satu mesin (Windows 11, Python 3.14.7, `127.0.0.1:8000`, 100 sampel, 10 pemanasan, resolusi timer 100 ns):
